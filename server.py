@@ -8,7 +8,7 @@ engine = create_engine(database_url, echo=True)
 
 base = declarative_base()
 
-#make to class with tablename and columns
+#creating the class with tablename and columns
 class Photo(base):
     __tablename__ = 'photos'
     id = Column(Integer, primary_key=True, autoincrement=True)
