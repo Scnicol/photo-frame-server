@@ -23,6 +23,6 @@ new_photo = Photo(photo_file_name="photo_name.jpg")
 session.add(new_photo)
 session.commit()
 
-print(f"Photo has been added with ID: {new_photo.id}")
+print(f"----------Photo has been added with ID: {new_photo.id}----------")
 
 session.close()
