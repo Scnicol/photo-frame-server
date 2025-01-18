@@ -1,28 +1,20 @@
-from sqlalchemy import create_engine, Column, Integer, String
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from typing import List
+from typing import Optional
+from sqlalchemy import ForeignKey
+from sqlalchemy import String
+from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import mapped_column
+from sqlalchemy.orm import relationship
 
-database_url = "sqlite:///photos.db"
-
-engine = create_engine(database_url, echo=True)
-
-base = declarative_base()
+class Base(DeclarativeBase):
+    pass
 
 #creating the class with tablename and columns
-class Photo(base):
+class Photo(Base):
     __tablename__ = 'photos'
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    photo_file_name = Column(String, nullable=False)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    photo_file_name: Mapped[str] = mapped_column(String(30))
 
-base.metadata.create_all(engine)
-
-Session = sessionmaker(bind=engine)
-
-session = Session()
-new_photo = Photo(photo_file_name="photo_name.jpg")
-session.add(new_photo)
-session.commit()
-
-print(f"----------Photo has been added with ID: {new_photo.id}----------")
-
-session.close()
+    def __repr__(self) -> str:
+        return f"User(id={self.id!r}, photo_file_name={self.photo_file_name!r})"
