@@ -1,7 +1,7 @@
 from typing import List
 from typing import Optional
 from sqlalchemy import ForeignKey
-from sqlalchemy import String, DateTime, func, Boolean
+from sqlalchemy import String, DateTime, func, Boolean, create_engine
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
@@ -23,7 +23,13 @@ class Photo(Base):
     )
     is_deleted: Mapped[bool] = mapped_column(Boolean, default=False)
 
+DATABASE_URL = "sqlite:///photo_server.db"
+engine = create_engine(DATABASE_URL, echo=True)
 
+if __name__ == "__main__":
+
+    Base.metadata.create_all(engine)
+    print("Database has been created")
 
 #Delete files from the file system on the Raspberry Pi
 
