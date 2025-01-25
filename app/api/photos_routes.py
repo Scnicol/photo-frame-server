@@ -20,8 +20,10 @@ def create_photo():
         with Session(engine) as session:
 
             new_photo = Photo(
-                is_active=data['is_active'],
-                is_verified=data['is_verified']
+                photo_file_name=data['photo_file_name'],
+                date_modified=data['date_modified'],
+                date_created=data['date_created'],
+                is_deleted=data['is_deleted']
             )
             session.add(new_photo)
             session.commit()
