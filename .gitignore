@@ -1,3 +1,4 @@
 photos.db
 .venv
 photo_server.db
+__pycache__
