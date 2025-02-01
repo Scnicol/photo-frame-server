@@ -1,3 +1,4 @@
+import os
 from flask import Flask, request, jsonify
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
@@ -6,6 +7,26 @@ from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})  #This will allow any frontend to talk to the flask backend
+
+@app.route('/delete/<int:photo_id>', methods=['DELETE'])
+@cross_origin()
+def delete_photo(photo_id):
+    try:
+        with Session(engine) as session:
+            #Fetch the photo by ID
+            photo = session.query(Photo).filter(Photo.id == photo_id).first()
+
+            #Create Error if the photo cannot be found
+            if not photo:
+                return jsonify({"error": "Photo not found"}), 404
+
+            #Check if it has already been deleted, return success and don't change anything
+            if photo.is_deleted:
+                return jsonify({
+                    "id": photo.id,
+                    "message": "Photo is already deleted"
+                }), 200
+            
 
 @app.route('/create', methods=['POST'])
 @cross_origin()

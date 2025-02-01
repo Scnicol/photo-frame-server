@@ -2,7 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import DateTime, Boolean, Integer, String, func
 
-DATABASE_URL = "sqlite:///photos_database.db"  # Or change this for PostgreSQL/MySQL
+DATABASE_URL = "sqlite:///photos.db"  # Or change this for PostgreSQL/MySQL
 
 # Create an SQLAlchemy engine
 engine = create_engine(DATABASE_URL, echo=True)
