@@ -2,6 +2,7 @@ import os
 from flask import Flask, request, jsonify
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy import select, update
 from server import engine, Photo, Base
 from flask_cors import CORS, cross_origin
 
@@ -14,7 +15,8 @@ def delete_photo(photo_id):
     try:
         with Session(engine) as session:
             #Fetch the photo by ID
-            photo = session.query(Photo).filter(Photo.id == photo_id).first()
+            stmt = select(Photo).where(Photo.id == photo_id)
+            photo = session.scalar(stmt)
 
             #Create Error if the photo cannot be found
             if not photo:
@@ -26,7 +28,7 @@ def delete_photo(photo_id):
                     "id": photo.id,
                     "message": "Photo is already deleted"
                 }), 200
-            
+
 
 @app.route('/create', methods=['POST'])
 @cross_origin()
