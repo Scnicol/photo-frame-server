@@ -42,7 +42,18 @@ def delete_photo(photo_id):
             session.execute(stmt)
             session.commit()
 
-            
+            #here we will delete the file from the system if it exists
+
+            return jsonify({
+                "id": photo.id,
+                "message": "Photo deleted successfully"
+            }), 200
+
+    except SQLAlchemyError as e:
+        return jsonify({"error": str(e)}), 500
+    except Exception as e:
+        return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
+
 
 @app.route('/create', methods=['POST'])
 @cross_origin()
