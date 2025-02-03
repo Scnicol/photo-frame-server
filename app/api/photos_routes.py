@@ -2,7 +2,7 @@ import os
 from flask import Flask, request, jsonify
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy import select, update
+from sqlalchemy import select, update, func
 from server import engine, Photo, Base
 from flask_cors import CORS, cross_origin
 
@@ -29,6 +29,20 @@ def delete_photo(photo_id):
                     "message": "Photo is already deleted"
                 }), 200
 
+            #Store file path, and then nulling out the file name
+            #
+
+            stmt = (
+                update(Photo).where(Photo.id == photo_id).values(
+                    is_deleted=True, #set to True
+                    date_modified=func.now(), #Update the timestamp
+                    photo_file_name=None #Null out file name
+                )
+            )
+            session.execute(stmt)
+            session.commit()
+
+            
 
 @app.route('/create', methods=['POST'])
 @cross_origin()
