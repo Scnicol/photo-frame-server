@@ -15,8 +15,7 @@ def delete_photo(photo_id):
     try:
         with Session(engine) as session:
             #Fetch the photo by ID
-            stmt = select(Photo).where(Photo.id == photo_id)
-            photo = session.scalar(stmt)
+            photo = session.get(Photo, photo_id)
 
             #Create Error if the photo cannot be found
             if not photo:
@@ -29,20 +28,16 @@ def delete_photo(photo_id):
                     "message": "Photo is already deleted"
                 }), 200
 
-            #Store file path, and then nulling out the file name
-            #
+            #Here we will store file path
 
-            stmt = (
-                update(Photo).where(Photo.id == photo_id).values(
-                    is_deleted=True, #set to True
-                    date_modified=func.now(), #Update the timestamp
-                    photo_file_name=None #Null out file name
-                )
-            )
-            session.execute(stmt)
+
+            photo.is_deleted=True, #set to True
+            photo.date_modified=func.now(), #Update the timestamp
+            photo.photo_file_name=None #Null out file name
+
             session.commit()
 
-            #here we will delete the file from the system if it exists
+            #here we will delete the file from the system using the saved filepath if it exists
 
             return jsonify({
                 "id": photo.id,
