@@ -12,7 +12,19 @@ CORS(app, resources={r"/*": {"origins": "*"}})  #This will allow any frontend to
 @app.route('/random-photo', methods=['GET'])
 @cross_origin()
 def get_random_photo():
-    
+    try:
+        with Session(engine) as session:
+            #Select a random row that isn't deleted
+            stmt = select(Photo).where(Photo.is_deleted == False).order_by(func.random()).limit(1)
+            photo = session.scalar(stmt)
+
+            
+
+    except SQLAlchemyError as e:
+        return jsonify({"error": str(e)}), 500
+    except Exception as e:
+        return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
+
 
 @app.route('/delete/<int:photo_id>', methods=['DELETE'])
 @cross_origin()
