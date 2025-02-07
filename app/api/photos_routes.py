@@ -9,6 +9,11 @@ from flask_cors import CORS, cross_origin
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})  #This will allow any frontend to talk to the flask backend
 
+@app.route('/random-photo', methods=['GET'])
+@cross_origin()
+def get_random_photo():
+    
+
 @app.route('/delete/<int:photo_id>', methods=['DELETE'])
 @cross_origin()
 def delete_photo(photo_id):
@@ -32,7 +37,7 @@ def delete_photo(photo_id):
 
 
             photo.is_deleted=True, #set to True
-            photo.date_modified=func.now(), #Update the timestamp
+                #Timestamp should be updated in the model file
             photo.photo_file_name=None #Null out file name
 
             session.commit()
