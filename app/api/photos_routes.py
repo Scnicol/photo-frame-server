@@ -1,4 +1,4 @@
-import os
+import os, base64
 from flask import Flask, request, jsonify
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
@@ -18,7 +18,18 @@ def get_random_photo():
             stmt = select(Photo).where(Photo.is_deleted == False).order_by(func.random()).limit(1)
             photo = session.scalar(stmt)
 
-            
+            #if there are no photos return error
+            if not photo:
+                return jsonify({"error": "No available photos"}), 404
+
+                #Here find the file path of the photo
+                #Then make sure the file exists
+
+                #Read the file and encode it as Base64
+            with open(file_path, "rb") as image_file:
+                base64_encoded = base64.b64encode(image_file.read()).decode("utf-8")
+
+
 
     except SQLAlchemyError as e:
         return jsonify({"error": str(e)}), 500
