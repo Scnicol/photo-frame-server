@@ -23,12 +23,21 @@ def get_random_photo():
                 return jsonify({"error": "No available photos"}), 404
 
                 #Here find the file path of the photo
+            file_path = os.path.join("uploads", photo.photo_file_name)
                 #Then make sure the file exists
+            if not os.path.exists(file_path):
+                return jsonify({"error": "Photo file not found on server"}), 500
 
                 #Read the file and encode it as Base64
             with open(file_path, "rb") as image_file:
                 base64_encoded = base64.b64encode(image_file.read()).decode("utf-8")
 
+            return jsonify({
+                "id": photo.id,
+                "photo_file_name": photo.photo_file_name,
+                "date_created": photo.date_created.strftime("%Y-%m-%d %H:%M:%S"),
+                "image_data": base64_encoded #this should be the encoded image data
+            }), 200
 
 
     except SQLAlchemyError as e:
