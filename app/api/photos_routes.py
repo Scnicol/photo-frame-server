@@ -68,7 +68,7 @@ def delete_photo(photo_id):
             #Here we will store file path
 
 
-            photo.is_deleted=True, #set to True
+            photo.is_deleted=True #set to True
                 #Timestamp should be updated in the model file
             photo.photo_file_name=None #Null out file name
 
