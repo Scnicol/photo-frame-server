@@ -2,3 +2,4 @@ photos.db
 .venv
 photo_server.db
 __pycache__
+uploads
