@@ -23,7 +23,7 @@ def get_random_photo():
                 return jsonify({"error": "No available photos"}), 404
 
                 #Here find the file path of the photo
-            file_path = os.path.join("uploads", photo.photo_file_name)
+            file_path = os.path.join(os.getcwd(), "uploads", photo.photo_file_name)
                 #Then make sure the file exists
             if not os.path.exists(file_path):
                 return jsonify({"error": "Photo file not found on server"}), 500
