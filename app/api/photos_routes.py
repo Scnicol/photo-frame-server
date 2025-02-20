@@ -110,10 +110,10 @@ def create_photo():
 
     # generate a random UUID for the filename
     file_name = f"{uuid.uuid4()}.jpg"
-    file_path = os.path.join(PHOTOS_FOLDER, file_name)
-
 
     # generate full path to where the image will be stored in the file system using the UUID
+    file_path = os.path.join(PHOTOS_FOLDER, file_name)
+
     # write the image binary to that full path
 
     try:
