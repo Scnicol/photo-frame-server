@@ -9,6 +9,13 @@ from flask_cors import CORS, cross_origin
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})  #This will allow any frontend to talk to the flask backend
 
+# Set the upload directory inside the current user's home directory
+PHOTOS_FOLDER = os.path.join(os.path.expanduser("~"), "photo-frame", "photos")
+app.config['PHOTOS_FOLDER'] = PHOTOS_FOLDER
+
+# Ensure the directory exists
+os.makedirs(app.config['PHOTOS_FOLDER'], exist_ok=True)
+
 @app.route('/random-photo', methods=['GET'])
 @cross_origin()
 def get_random_photo():
@@ -95,12 +102,21 @@ def create_photo():
     data = request.get_json()
 
     # Make sure the data is there before creating
-    if not data or 'photo_file_name' not in data:
+    if not data or 'image_data' not in data:
         return jsonify({"error": "Invalid input"}), 400
+
+    # extract image data from the data dictionary and convert base64 image data into binary data
+    image_data = base64.b64decode(data["image_data"])
+
+    # generate a random UUID for the filename
+    
+    # generate full path to where the image will be stored in the file system using the UUID
+    # write the image binary to that full path
 
     try:
 
         with Session(engine) as session:
+            # set the UUID as the photo_file_name
             new_photo = Photo(photo_file_name=data["photo_file_name"])
             session.add(new_photo)
             session.commit()
