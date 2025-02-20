@@ -1,4 +1,4 @@
-import os, base64
+import os, base64, uuid
 from flask import Flask, request, jsonify
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
@@ -109,7 +109,10 @@ def create_photo():
     image_data = base64.b64decode(data["image_data"])
 
     # generate a random UUID for the filename
-    
+    file_name = f"{uuid.uuid4()}.jpg"
+    file_path = os.path.join(PHOTOS_FOLDER, file_name)
+
+
     # generate full path to where the image will be stored in the file system using the UUID
     # write the image binary to that full path
 
