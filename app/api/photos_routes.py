@@ -105,22 +105,25 @@ def create_photo():
     if not data or 'image_data' not in data:
         return jsonify({"error": "Invalid input"}), 400
 
-    # extract image data from the data dictionary and convert base64 image data into binary data
-    image_data = base64.b64decode(data["image_data"])
-
-    # generate a random UUID for the filename
-    file_name = f"{uuid.uuid4()}.jpg"
-
-    # generate full path to where the image will be stored in the file system using the UUID
-    file_path = os.path.join(PHOTOS_FOLDER, file_name)
-
-    # write the image binary to that full path
 
     try:
 
+        # extract image data from the data dictionary and convert base64 image data into binary data
+        image_data = base64.b64decode(data["image_data"])
+
+        # generate a random UUID for the filename
+        file_name = f"{uuid.uuid4()}.jpg"
+
+        # generate full path to where the image will be stored in the file system using the UUID
+        file_path = os.path.join(PHOTOS_FOLDER, file_name)
+
+        # write the image binary to that full path
+        with open(file_path, "wb") as image_file:
+            image_file.write(image_data)
+
         with Session(engine) as session:
             # set the UUID as the photo_file_name
-            new_photo = Photo(photo_file_name=data["photo_file_name"])
+            new_photo = Photo(photo_file_name=file_name)
             session.add(new_photo)
             session.commit()
             session.refresh(new_photo)
