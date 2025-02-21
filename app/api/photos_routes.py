@@ -30,14 +30,13 @@ def get_random_photo():
                 return jsonify({"error": "No available photos"}), 404
 
             #Here find the file path of the photo
-            file_path = os.path.join(os.getcwd(), "uploads", photo.photo_file_name)
-            print(f"🔍 Checking file path: {file_path}")  # Debugging line for filepath
+            file_path = os.path.join(PHOTOS_FOLDER, photo.photo_file_name)
 
             #Then make sure the file exists
             if not os.path.exists(file_path):
                 return jsonify({"error": "Photo file not found on server"}), 500
 
-                #Read the file and encode it as Base64
+            #Read the file and encode it as Base64
             with open(file_path, "rb") as image_file:
                 base64_encoded = base64.b64encode(image_file.read()).decode("utf-8")
 
