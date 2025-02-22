@@ -74,15 +74,19 @@ def delete_photo(photo_id):
                 }), 200
 
             #Here we will store file path
-
+            file_path = os.path.join(PHOTOS_FOLDER, photo.photo_file_name)
 
             photo.is_deleted=True #set to True
-                #Timestamp should be updated in the model file
             photo.photo_file_name=None #Null out file name
 
-            session.commit()
+
 
             #here we will delete the file from the system using the saved filepath if it exists
+            if file_path and os.path.exists(file_path):
+                os.remove(file_path)
+                print(f"Deleted photo: {file_path}")
+
+            session.commit()
 
             return jsonify({
                 "id": photo.id,
