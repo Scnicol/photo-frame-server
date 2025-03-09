@@ -3,7 +3,7 @@ from flask import Flask, request, jsonify
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import select, update, func
-from server import engine, Photo, Base
+from app.models.photos import engine, Photo, Base
 from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
