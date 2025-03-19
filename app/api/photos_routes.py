@@ -102,17 +102,18 @@ def delete_photo(photo_id):
 @app.route('/create', methods=['POST'])
 @cross_origin()
 def create_photo():
-    data = request.get_json()
 
-    # Make sure the data is there before creating
-    if not data or 'image_data' not in data:
-        return jsonify({"error": "Invalid input"}), 400
+    #Checking if the request has the file part
+    if 'imageData' not in request.files:
+        return jsonify({"error": "No image file found in request"}), 400
+
+    file = request.files['imageData']
+
+    #Read the file bytes
+    image_data = file.read()
 
 
     try:
-
-        # extract image data from the data dictionary and convert base64 image data into binary data
-        image_data = base64.b64decode(data["image_data"])
 
         # generate a random UUID for the filename
         file_name = f"{uuid.uuid4()}.jpg"
