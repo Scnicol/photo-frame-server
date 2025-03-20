@@ -121,9 +121,8 @@ def create_photo():
         # generate full path to where the image will be stored in the file system using the UUID
         file_path = os.path.join(PHOTOS_FOLDER, file_name)
 
-        # write the image binary to that full path
-        with open(file_path, "wb") as image_file:
-            image_file.write(image_data)
+        #save the file directly to the file system
+        file.save(file_path)
 
         with Session(engine) as session:
             # set the UUID as the photo_file_name
