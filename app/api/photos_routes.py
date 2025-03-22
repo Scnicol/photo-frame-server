@@ -109,10 +109,6 @@ def create_photo():
 
     file = request.files['imageData']
 
-    #Read the file bytes
-    image_data = file.read()
-
-
     try:
 
         # generate a random UUID for the filename
