@@ -1,5 +1,5 @@
-import os, base64, uuid
-from flask import Flask, request, jsonify
+import os, base64, uuid,random
+from flask import Flask, request, jsonify, send_from_directory
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import select, update, func
@@ -36,16 +36,8 @@ def get_random_photo():
             if not os.path.exists(file_path):
                 return jsonify({"error": "Photo file not found on server"}), 500
 
-            #Read the file and encode it as Base64
-            with open(file_path, "rb") as image_file:
-                base64_encoded = base64.b64encode(image_file.read()).decode("utf-8")
 
-            return jsonify({
-                "id": photo.id,
-                "photo_file_name": photo.photo_file_name,
-                "date_created": photo.date_created.strftime("%Y-%m-%d %H:%M:%S"),
-                "image_data": base64_encoded #this should be the encoded image data
-            }), 200
+            return send_from_directory(PHOTOS_FOLDER, photo.photo_file_name, as_attachment=False)
 
 
     except SQLAlchemyError as e:
