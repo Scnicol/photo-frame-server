@@ -1,5 +1,5 @@
-import os, base64, uuid
-from flask import Flask, request, jsonify
+import os, base64, uuid,random
+from flask import Flask, request, jsonify, send_from_directory
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import select, update, func
@@ -36,16 +36,8 @@ def get_random_photo():
             if not os.path.exists(file_path):
                 return jsonify({"error": "Photo file not found on server"}), 500
 
-            #Read the file and encode it as Base64
-            with open(file_path, "rb") as image_file:
-                base64_encoded = base64.b64encode(image_file.read()).decode("utf-8")
 
-            return jsonify({
-                "id": photo.id,
-                "photo_file_name": photo.photo_file_name,
-                "date_created": photo.date_created.strftime("%Y-%m-%d %H:%M:%S"),
-                "image_data": base64_encoded #this should be the encoded image data
-            }), 200
+            return send_from_directory(PHOTOS_FOLDER, photo.photo_file_name, as_attachment=False)
 
 
     except SQLAlchemyError as e:
@@ -102,17 +94,14 @@ def delete_photo(photo_id):
 @app.route('/create', methods=['POST'])
 @cross_origin()
 def create_photo():
-    data = request.get_json()
 
-    # Make sure the data is there before creating
-    if not data or 'image_data' not in data:
-        return jsonify({"error": "Invalid input"}), 400
+    #Checking if the request has the file part
+    if 'imageData' not in request.files:
+        return jsonify({"error": "No image file found in request"}), 400
 
+    file = request.files['imageData']
 
     try:
-
-        # extract image data from the data dictionary and convert base64 image data into binary data
-        image_data = base64.b64decode(data["image_data"])
 
         # generate a random UUID for the filename
         file_name = f"{uuid.uuid4()}.jpg"
@@ -120,9 +109,8 @@ def create_photo():
         # generate full path to where the image will be stored in the file system using the UUID
         file_path = os.path.join(PHOTOS_FOLDER, file_name)
 
-        # write the image binary to that full path
-        with open(file_path, "wb") as image_file:
-            image_file.write(image_data)
+        #save the file directly to the file system
+        file.save(file_path)
 
         with Session(engine) as session:
             # set the UUID as the photo_file_name
@@ -143,4 +131,4 @@ def create_photo():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5001, debug=True)
