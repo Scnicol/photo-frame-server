@@ -9,17 +9,13 @@ from flask_cors import CORS, cross_origin
 # Creat a Blueprint for photos
 photo_bp = Blueprint("photos", __name__)
 
-app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})  #This will allow any frontend to talk to the flask backend
-
 # Set the upload directory inside the current user's home directory
 PHOTOS_FOLDER = os.path.join(os.path.expanduser("~"), "photo-frame", "photos")
-app.config['PHOTOS_FOLDER'] = PHOTOS_FOLDER
 
 # Ensure the directory exists
-os.makedirs(app.config['PHOTOS_FOLDER'], exist_ok=True)
+os.makedirs(PHOTOS_FOLDER, exist_ok=True)
 
-@app.route('/random-photo', methods=['GET'])
+@photo_bp.route('/random-photo', methods=['GET'])
 @cross_origin()
 def get_random_photo():
     try:
@@ -49,7 +45,7 @@ def get_random_photo():
         return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
 
 
-@app.route('/delete/<int:photo_id>', methods=['DELETE'])
+@photo_bp.route('/delete/<int:photo_id>', methods=['DELETE'])
 @cross_origin()
 def delete_photo(photo_id):
     try:
@@ -94,7 +90,7 @@ def delete_photo(photo_id):
         return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
 
 
-@app.route('/create', methods=['POST'])
+@photo_bp.route('/create', methods=['POST'])
 @cross_origin()
 def create_photo():
 
@@ -132,6 +128,3 @@ def create_photo():
             }), 201
     except SQLAlchemyError as e:
         return jsonify({"error": str(e)}), 500
-
-if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=5001, debug=True)
