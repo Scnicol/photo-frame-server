@@ -1,10 +1,13 @@
 import os, base64, uuid,random
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, Blueprint
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import select, update, func
 from app.models.photos import engine, Photo, Base
 from flask_cors import CORS, cross_origin
+
+# Creat a Blueprint for photos
+photo_bp = Blueprint("photos", __name__)
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})  #This will allow any frontend to talk to the flask backend
