@@ -50,6 +50,7 @@ def get_random_photo():
 def delete_photo(photo_id):
     try:
         with Session(engine) as session:
+            
             #Fetch the photo by ID
             photo = session.get(Photo, photo_id)
 
