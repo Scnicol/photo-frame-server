@@ -1,11 +1,13 @@
 import os
 from flask import Flask
 from flask_cors import CORS
-from app.api.photos_routes import photo_bp
+from app.api import register_api_blueprints
+
+#TODO Refactor Project layout to follow the Flask tutorials' layout as close as possible
 
 def create_app():
     app = Flask(__name__)
-    CORS(app)
+    CORS(app) #TODO do we need to keep CORS? investigate.
 
     # Set configuration for all Blueprints to use
     app.config["PHOTOS_FOLDER"] = os.path.join(os.path.expanduser("~"), "photo-frame", "photos")
@@ -14,7 +16,7 @@ def create_app():
     os.makedirs(app.config["PHOTOS_FOLDER"], exist_ok=True)
 
     # Register blueprints
-    app.register_blueprint(photo_bp, url_prefix="/api/photos")
+    register_api_blueprints(app)
 
     return app
 
