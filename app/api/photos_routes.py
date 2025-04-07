@@ -3,7 +3,6 @@ from flask import request, jsonify, send_from_directory, Blueprint, current_app
 from sqlalchemy.orm import Session
 from sqlalchemy import select, func
 from app.models.photos import engine, Photo
-from flask_cors import cross_origin #TODO do we need cross_origin here? Look up.
 
 #TODO Change all the single quotes to double quotes where needed.
 #TODO Check all the comments and add a space and capitalize
@@ -12,7 +11,6 @@ from flask_cors import cross_origin #TODO do we need cross_origin here? Look up.
 photos_bp = Blueprint("photos", __name__)
 
 @photos_bp.route('/random', methods=['GET']) #TODO update shortcuts to fit new url
-@cross_origin() #TODO do we need cross_origin?
 def get_random_photo():
     with Session(engine) as session:
         # Select a random row that isn't deleted
@@ -33,7 +31,6 @@ def get_random_photo():
         return send_from_directory(current_app.config["PHOTOS_FOLDER"], photo.photo_file_name, as_attachment=False)
 
 @photos_bp.route('/', methods=['POST']) #TODO update the shortcut
-@cross_origin()
 def create_photo():
     # Check if the request has the file part
     if 'imageData' not in request.files:
@@ -60,7 +57,6 @@ def create_photo():
         return jsonify(new_photo.to_dict()), 201
 
 @photos_bp.route('/<int:photo_id>', methods=['DELETE']) #TODO update the shortcut
-@cross_origin()
 def delete_photo(photo_id):
     with Session(engine) as session:
         # Fetch the photo by ID
