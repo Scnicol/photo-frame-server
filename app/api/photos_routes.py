@@ -4,13 +4,12 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select, func
 from app.models.photos import engine, Photo
 
-#TODO Change all the single quotes to double quotes where needed.
 #TODO Check all the comments and add a space and capitalize
 
 # Create a Blueprint for photos
 photos_bp = Blueprint("photos", __name__)
 
-@photos_bp.route('/random', methods=['GET']) #TODO update shortcuts to fit new url
+@photos_bp.route("/random", methods=["GET"]) #TODO update shortcuts to fit new url
 def get_random_photo():
     with Session(engine) as session:
         # Select a random row that isn't deleted
@@ -30,13 +29,13 @@ def get_random_photo():
 
         return send_from_directory(current_app.config["PHOTOS_FOLDER"], photo.photo_file_name, as_attachment=False)
 
-@photos_bp.route('/', methods=['POST']) #TODO update the shortcut
+@photos_bp.route("/", methods=["POST"]) #TODO update the shortcut
 def create_photo():
     # Check if the request has the file part
-    if 'imageData' not in request.files:
+    if "imageData" not in request.files:
         return jsonify({"error": "No image file found in request"}), 400
 
-    file = request.files['imageData']
+    file = request.files["imageData"]
 
     # Generate a random UUID for the filename
     file_name = f"{uuid.uuid4()}.jpg"
@@ -56,7 +55,7 @@ def create_photo():
 
         return jsonify(new_photo.to_dict()), 201
 
-@photos_bp.route('/<int:photo_id>', methods=['DELETE']) #TODO update the shortcut
+@photos_bp.route("/<int:photo_id>", methods=["DELETE"]) #TODO update the shortcut
 def delete_photo(photo_id):
     with Session(engine) as session:
         # Fetch the photo by ID

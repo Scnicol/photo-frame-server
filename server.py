@@ -7,7 +7,6 @@ from app.api import register_api_blueprints
 
 def create_app():
     app = Flask(__name__)
-    CORS(app) #TODO do we need to keep CORS? investigate.
 
     # Set configuration for all Blueprints to use
     app.config["PHOTOS_FOLDER"] = os.path.join(os.path.expanduser("~"), "photo-frame", "photos")

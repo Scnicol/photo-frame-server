@@ -4,9 +4,9 @@ from sqlalchemy import DateTime, Boolean, Integer, String, func
 
 DATABASE_URL = "sqlite:///photos.db"
 
-#TODO look up where the database usually is located in a project layout.
+#TODO Look up where the database usually is located in a project layout.
 
-# Create an SQLAlchemy engine
+# Create a SQLAlchemy engine
 engine = create_engine(DATABASE_URL, echo=True)
 
 class Base(DeclarativeBase):
