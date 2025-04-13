@@ -4,8 +4,6 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select, func
 from app.models.photos import engine, Photo
 
-#TODO Check all the comments and add a space and capitalize
-
 # Create a Blueprint for photos
 photos_bp = Blueprint("photos", __name__)
 
