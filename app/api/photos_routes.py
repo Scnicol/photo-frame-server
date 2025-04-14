@@ -7,7 +7,7 @@ from app.models.photos import engine, Photo
 # Create a Blueprint for photos
 photos_bp = Blueprint("photos", __name__)
 
-@photos_bp.route("/random", methods=["GET"]) #TODO update shortcuts to fit new url
+@photos_bp.route("/random", methods=["GET"])
 def get_random_photo():
     with Session(engine) as session:
         # Select a random row that isn't deleted
@@ -27,7 +27,7 @@ def get_random_photo():
 
         return send_from_directory(current_app.config["PHOTOS_FOLDER"], photo.photo_file_name, as_attachment=False)
 
-@photos_bp.route("/", methods=["POST"]) #TODO update the shortcut
+@photos_bp.route("/", methods=["POST"])
 def create_photo():
     # Check if the request has the file part
     if "imageData" not in request.files:
