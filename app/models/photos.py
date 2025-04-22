@@ -1,13 +1,5 @@
-from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import DateTime, Boolean, Integer, String, func
-
-DATABASE_URL = "sqlite:///photos.db"
-
-#TODO Look up where the database usually is located in a project layout.
-
-# Create a SQLAlchemy engine
-engine = create_engine(DATABASE_URL, echo=True)
 
 class Base(DeclarativeBase):
     pass
