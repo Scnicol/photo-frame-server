@@ -1,9 +1,8 @@
 import os
 from flask import Flask
-from flask_cors import CORS
 from app.api import register_api_blueprints
-
-#TODO Refactor Project layout to follow the Flask tutorials' layout as close as possible
+from app.db.database import Base, engine
+from app.models import photos  # Make sure all models are imported so they're registered
 
 def create_app():
     app = Flask(__name__)
@@ -14,6 +13,9 @@ def create_app():
     # Ensure directory exists before running
     os.makedirs(app.config["PHOTOS_FOLDER"], exist_ok=True)
 
+    # Now that models are imported, create the tables
+    Base.metadata.create_all(bind=engine)
+    
     # Register blueprints
     register_api_blueprints(app)
 

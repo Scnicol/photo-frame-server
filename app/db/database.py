@@ -3,9 +3,6 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 
 DATABASE_URL = "sqlite:///instance/photos.db"
 
-# Create a SQLAlchemy engine
-engine = create_engine(DATABASE_URL, echo=True)
-SessionLocal = sessionmaker(bind=engine)
-
-# Create tables in the database (if they don't already exist)
+engine = create_engine(DATABASE_URL, echo=True, connect_args={"check_same_thread": False})
+SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
 Base = declarative_base()
