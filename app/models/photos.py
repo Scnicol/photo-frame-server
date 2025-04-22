@@ -20,5 +20,4 @@ class Photo(Base):
             "date_modified": self.date_modified,
         }
 
-# Create tables in the database (if they don't already exist)
-Base.metadata.create_all(engine)
+
