@@ -1,8 +1,6 @@
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import DateTime, Boolean, Integer, String, func
-
-class Base(DeclarativeBase):
-    pass
+from app.db.database import Base
 
 class Photo(Base):
     __tablename__ = "photos"
@@ -19,5 +17,3 @@ class Photo(Base):
             "date_created": self.date_created,
             "date_modified": self.date_modified,
         }
-
-

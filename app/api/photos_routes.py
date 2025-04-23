@@ -2,7 +2,8 @@ import os, uuid
 from flask import request, jsonify, send_from_directory, Blueprint, current_app
 from sqlalchemy.orm import Session
 from sqlalchemy import select, func
-from app.models.photos import engine, Photo
+from app.models.photos import Photo
+from app.db.database import engine
 
 # Create a Blueprint for photos
 photos_bp = Blueprint("photos", __name__)
