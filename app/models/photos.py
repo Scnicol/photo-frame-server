@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import DateTime, Boolean, Integer, String, func
-from app.db.database import Base
+from app.db.database import db
 
-class Photo(Base):
+class Photo(db.Model):
     __tablename__ = "photos"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
