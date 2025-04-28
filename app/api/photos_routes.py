@@ -51,7 +51,7 @@ def create_photo():
 
     return jsonify(new_photo.to_dict()), 201
 
-@photos_bp.route("/<int:photo_id>", methods=["DELETE"]) #TODO update the shortcut
+@photos_bp.route("/<int:photo_id>", methods=["DELETE"])
 def delete_photo(photo_id):
     # Fetch the photo by ID
     photo = db.session.get(Photo, photo_id)
