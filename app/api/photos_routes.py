@@ -1,4 +1,5 @@
 import os, uuid
+from datetime import datetime
 from flask import request, jsonify, send_from_directory, Blueprint, current_app
 from sqlalchemy import select, func
 from app.models.photos import Photo
@@ -76,3 +77,29 @@ def delete_photo(photo_id):
     db.session.commit()
 
     return jsonify({"message": "Photo deleted successfully"}), 200
+
+@photos_bp.route("/metadata", methods=["GET"])
+def get_photo_metadata():
+    modified_since = request.args.get("modified_since")
+    query = db.session.query(Photo).filter(Photo.is_deleted == False)
+
+    if modified_since:
+        try:
+            modified_date = datetime.fromisoformat(modified_since)
+            query = query.filter(Photo.date_modified > modified_date)
+        except ValueError:
+            return jsonify({"error": "Invalid date format. Use ISO format (e.g., 2024-04-27T12:00:00)"}), 400
+
+    photos = query.all()
+
+    result = []
+    for photo in photos:
+        result.append({
+            "id": photo.id,
+            "title": getattr(photo, "title", None),
+            "description": getattr(photo, "description", None),
+            "created_at": photo.date_created.isoformat(),
+            "last_modified": photo.date_modified.isoformat()
+        })
+
+    return jsonify(result)
