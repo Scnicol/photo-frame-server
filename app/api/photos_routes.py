@@ -8,6 +8,22 @@ from app.db.database import db
 # Create a Blueprint for photos
 photos_bp = Blueprint("photos", __name__)
 
+@photos_bp.route("/<int:photo_id>/image", methods=["GET"])
+def get_photo_image(photo_id):
+    # Fetch the photo by ID
+    photo = db.session.get(Photo, photo_id)
+
+    if not photo or photo.is_deleted:
+        return jsonify({"error": "Photo not found"}), 404
+
+    # Build file path
+    file_path = os.path.join(current_app.config["PHOTOS_FOLDER"], photo.photo_file_name)
+
+    if not os.path.exists(file_path):
+        return jsonify({"error": "Photo file not found on server"}), 500
+
+    return send_from_directory(current_app.config["PHOTOS_FOLDER"], photo.photo_file_name, as_attachment=False)
+
 @photos_bp.route("/random", methods=["GET"])
 def get_random_photo():
     # Select a random row that isn't deleted
