@@ -1,134 +1,121 @@
-import os, base64, uuid,random
-from flask import Flask, request, jsonify, send_from_directory
-from sqlalchemy.orm import Session
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy import select, update, func
-from server import engine, Photo, Base
-from flask_cors import CORS, cross_origin
+import os, uuid
+from datetime import datetime
+from flask import request, jsonify, send_from_directory, Blueprint, current_app
+from sqlalchemy import select, func
+from app.models.photos import Photo
+from app.db.database import db
 
-app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})  #This will allow any frontend to talk to the flask backend
+# Create a Blueprint for photos
+photos_bp = Blueprint("photos", __name__)
 
-# Set the upload directory inside the current user's home directory
-PHOTOS_FOLDER = os.path.join(os.path.expanduser("~"), "photo-frame", "photos")
-app.config['PHOTOS_FOLDER'] = PHOTOS_FOLDER
+@photos_bp.route("/<int:photo_id>/image", methods=["GET"])
+def get_photo_image(photo_id):
+    # Fetch the photo by ID
+    photo = db.session.get(Photo, photo_id)
 
-# Ensure the directory exists
-os.makedirs(app.config['PHOTOS_FOLDER'], exist_ok=True)
+    if not photo or photo.is_deleted:
+        return jsonify({"error": "Photo not found"}), 404
 
-@app.route('/random-photo', methods=['GET'])
-@cross_origin()
+    # Build file path
+    file_path = os.path.join(current_app.config["PHOTOS_FOLDER"], photo.photo_file_name)
+
+    if not os.path.exists(file_path):
+        return jsonify({"error": "Photo file not found on server"}), 500
+
+    return send_from_directory(current_app.config["PHOTOS_FOLDER"], photo.photo_file_name, as_attachment=False)
+
+@photos_bp.route("/random", methods=["GET"])
 def get_random_photo():
-    try:
-        with Session(engine) as session:
-            #Select a random row that isn't deleted
-            stmt = select(Photo).where(Photo.is_deleted == False).order_by(func.random()).limit(1)
-            photo = session.scalar(stmt)
+    # Select a random row that isn't deleted
+    stmt = select(Photo).where(Photo.is_deleted == False).order_by(func.random()).limit(1)
+    photo = db.session.scalar(stmt)
 
-            #if there are no photos return error
-            if not photo:
-                return jsonify({"error": "No available photos"}), 404
+    # If there are no photos return error
+    if not photo:
+        return jsonify({"error": "No available photos"}), 404
 
-            #Here find the file path of the photo
-            file_path = os.path.join(PHOTOS_FOLDER, photo.photo_file_name)
+    # Create the file path to the photo
+    file_path = os.path.join(current_app.config["PHOTOS_FOLDER"], photo.photo_file_name)
 
-            #Then make sure the file exists
-            if not os.path.exists(file_path):
-                return jsonify({"error": "Photo file not found on server"}), 500
+    # Make sure the file exists
+    if not os.path.exists(file_path):
+        return jsonify({"error": "Photo file not found on server"}), 500
 
+    return send_from_directory(current_app.config["PHOTOS_FOLDER"], photo.photo_file_name, as_attachment=False)
 
-            return send_from_directory(PHOTOS_FOLDER, photo.photo_file_name, as_attachment=False)
-
-
-    except SQLAlchemyError as e:
-        return jsonify({"error": str(e)}), 500
-    except Exception as e:
-        return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
-
-
-@app.route('/delete/<int:photo_id>', methods=['DELETE'])
-@cross_origin()
-def delete_photo(photo_id):
-    try:
-        with Session(engine) as session:
-            #Fetch the photo by ID
-            photo = session.get(Photo, photo_id)
-
-            #Create Error if the photo cannot be found
-            if not photo:
-                return jsonify({"error": "Photo not found"}), 404
-
-            #Check if it has already been deleted, return success and don't change anything
-            if photo.is_deleted:
-                return jsonify({
-                    "id": photo.id,
-                    "message": "Photo is already deleted"
-                }), 200
-
-            #Here we will store file path
-            file_path = os.path.join(PHOTOS_FOLDER, photo.photo_file_name)
-
-            photo.is_deleted=True #set to True
-            photo.photo_file_name=None #Null out file name
-
-
-
-            #here we will delete the file from the system using the saved filepath if it exists
-            if file_path and os.path.exists(file_path):
-                os.remove(file_path)
-                print(f"Deleted photo: {file_path}")
-
-            session.commit()
-
-            return jsonify({
-                "id": photo.id,
-                "message": "Photo deleted successfully"
-            }), 200
-
-    except SQLAlchemyError as e:
-        return jsonify({"error": str(e)}), 500
-    except Exception as e:
-        return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
-
-
-@app.route('/create', methods=['POST'])
-@cross_origin()
+@photos_bp.route("/", methods=["POST"])
 def create_photo():
-
-    #Checking if the request has the file part
-    if 'imageData' not in request.files:
+    # Check if the request has the file part
+    if "imageData" not in request.files:
         return jsonify({"error": "No image file found in request"}), 400
 
-    file = request.files['imageData']
+    file = request.files["imageData"]
 
-    try:
+    # Generate a random UUID for the filename
+    file_name = f"{uuid.uuid4()}.jpg"
 
-        # generate a random UUID for the filename
-        file_name = f"{uuid.uuid4()}.jpg"
+    # Generate full path to where the image will be stored in the file system using the UUID
+    file_path = os.path.join(current_app.config["PHOTOS_FOLDER"], file_name)
 
-        # generate full path to where the image will be stored in the file system using the UUID
-        file_path = os.path.join(PHOTOS_FOLDER, file_name)
+    # Save the file directly to the file system
+    file.save(file_path)
 
-        #save the file directly to the file system
-        file.save(file_path)
+    # Set the UUID as the photo_file_name
+    new_photo = Photo(photo_file_name=file_name)
+    db.session.add(new_photo)
+    db.session.commit()
+    db.session.refresh(new_photo)
 
-        with Session(engine) as session:
-            # set the UUID as the photo_file_name
-            new_photo = Photo(photo_file_name=file_name)
-            session.add(new_photo)
-            session.commit()
-            session.refresh(new_photo)
+    return jsonify(new_photo.to_dict()), 201
 
-            return jsonify({
-                "id": new_photo.id,
-                "photo_file_name": new_photo.photo_file_name,
-                "date_created": new_photo.date_created.strftime("%Y-%m-%d %H:%M:%S"),
-                "date_modified": new_photo.date_modified.strftime("%Y-%m-%d %H:%M:%S"),
-                "is_deleted": new_photo.is_deleted,
-                "message": "New photo created successfully"
-            }), 201
-    except SQLAlchemyError as e:
-        return jsonify({"error": str(e)}), 500
+@photos_bp.route("/<int:photo_id>", methods=["DELETE"])
+def delete_photo(photo_id):
+    # Fetch the photo by ID
+    photo = db.session.get(Photo, photo_id)
 
-if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=5001, debug=True)
+    # Create Error if the photo cannot be found
+    if not photo:
+        return jsonify({"error": "Photo not found"}), 404
+
+    # Check if it has already been deleted
+    if photo.is_deleted:
+        return jsonify({"message": "Photo is already deleted"}), 200
+
+    # Delete the file from the system using the saved filepath if it exists
+    file_path = os.path.join(current_app.config["PHOTOS_FOLDER"], photo.photo_file_name)
+    if file_path and os.path.exists(file_path):
+        os.remove(file_path)
+        print(f"Deleted photo: {file_path}")
+
+    # Update photo database entry
+    photo.is_deleted = True
+    photo.photo_file_name = None
+    db.session.commit()
+
+    return jsonify({"message": "Photo deleted successfully"}), 200
+
+@photos_bp.route("/metadata", methods=["GET"])
+def get_photo_metadata():
+    modified_since = request.args.get("modified_since")
+    query = db.session.query(Photo).filter(Photo.is_deleted == False)
+
+    if modified_since:
+        try:
+            modified_date = datetime.fromisoformat(modified_since)
+            query = query.filter(Photo.date_modified > modified_date)
+        except ValueError:
+            return jsonify({"error": "Invalid date format. Use ISO format (e.g., 2024-04-27T12:00:00)"}), 400
+
+    photos = query.all()
+
+    result = []
+    for photo in photos:
+        result.append({
+            "id": photo.id,
+            "title": getattr(photo, "title", None),
+            "description": getattr(photo, "description", None),
+            "created_at": photo.date_created.isoformat(),
+            "last_modified": photo.date_modified.isoformat()
+        })
+
+    return jsonify(result)
