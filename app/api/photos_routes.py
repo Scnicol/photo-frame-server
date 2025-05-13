@@ -107,15 +107,4 @@ def get_photo_metadata():
             return jsonify({"error": "Invalid date format. Use ISO format (e.g., 2024-04-27T12:00:00)"}), 400
 
     photos = query.all()
-
-    result = []
-    for photo in photos:
-        result.append({
-            "id": photo.id,
-            "title": getattr(photo, "title", None),
-            "description": getattr(photo, "description", None),
-            "created_at": photo.date_created.isoformat(),
-            "last_modified": photo.date_modified.isoformat()
-        })
-
-    return jsonify(result)
+    return jsonify([photo.to_dict() for photo in photos]), 200
