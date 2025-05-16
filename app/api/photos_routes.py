@@ -97,14 +97,15 @@ def delete_photo(photo_id):
 @photos_bp.route("/metadata", methods=["GET"])
 def get_photo_metadata():
     modified_since = request.args.get("modified_since")
-    query = db.session.query(Photo).filter(Photo.is_deleted == False)
 
     if modified_since:
         try:
             modified_date = datetime.fromisoformat(modified_since)
-            query = query.filter(Photo.date_modified > modified_date)
+            query = db.session.query(Photo).filter(Photo.date_modified > modified_date)
         except ValueError:
             return jsonify({"error": "Invalid date format. Use ISO format (e.g., 2024-04-27T12:00:00)"}), 400
+    else:
+        query = db.session.query(Photo).filter(Photo.is_deleted == False)
 
     photos = query.all()
     return jsonify([photo.to_dict() for photo in photos]), 200
