@@ -16,4 +16,5 @@ class Photo(db.Model):
             "id": self.id,
             "date_created": self.date_created,
             "date_modified": self.date_modified,
+            "is_deleted": self.is_deleted,
         }
